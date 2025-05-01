@@ -90,11 +90,7 @@ const MockupViewer = () => {
       description: 'Tools for facilitating live learning sessions, including video, chat, and collaborative features.',
       category: 'Synchronous Learning',
       tags: ['live', 'session', 'video', 'facilitation']
-    }
-  ];
-
-  // Additional mockups
-  const additionalMockups = [
+    },
     {
       id: 'microlearning-adaptive-content',
       name: 'Microlearning & Adaptive Content',
@@ -163,8 +159,7 @@ const MockupViewer = () => {
 
   useEffect(() => {
     // Simulate fetching mockups
-    const allMockups = [...mockupFiles, ...additionalMockups];
-    setMockups(allMockups);
+    setMockups(mockupFiles);
     setLoading(false);
   }, []);
 
@@ -337,3 +332,186 @@ const MockupViewer = () => {
                 />
               </div>
             </div>
+
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                <p className="mt-4 text-slate-600">Loading mockups...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-20">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : (
+              <>
+                {/* Grid View */}
+                {activeView === 'grid' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredMockups.map((mockup) => (
+                      <div 
+                        key={mockup.id} 
+                        className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleSelectMockup(mockup)}
+                      >
+                        <div className="h-40 bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center p-4">
+                          <div className="bg-white/20 p-4 rounded-full">
+                            <Layers size={40} className="text-white" />
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-lg font-medium text-slate-800 mb-1">{mockup.name}</h3>
+                          <p className="text-sm text-slate-600 line-clamp-2">{mockup.description}</p>
+                          <div className="mt-3 flex justify-between items-center">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                              {mockup.category}
+                            </span>
+                            <button 
+                              className="inline-flex items-center text-indigo-600 hover:text-indigo-800"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewOnGitHub(mockup);
+                              }}
+                            >
+                              <Code size={16} className="mr-1" />
+                              <span className="text-xs">View Code</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* List View */}
+                {activeView === 'list' && (
+                  <div className="bg-white overflow-hidden rounded-xl shadow-sm">
+                    <ul className="divide-y divide-slate-200">
+                      {filteredMockups.map((mockup) => (
+                        <li 
+                          key={mockup.id} 
+                          className="hover:bg-slate-50 cursor-pointer"
+                          onClick={() => handleSelectMockup(mockup)}
+                        >
+                          <div className="px-6 py-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <div className="bg-indigo-100 p-2 rounded-md mr-4">
+                                  <Layers size={20} className="text-indigo-600" />
+                                </div>
+                                <div>
+                                  <h3 className="text-md font-medium text-slate-800">{mockup.name}</h3>
+                                  <p className="text-sm text-slate-600 mt-1">{mockup.description}</p>
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                      {mockup.category}
+                                    </span>
+                                    {mockup.tags.slice(0, 3).map(tag => (
+                                      <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                        {tag}
+                                      </span>
+                                    ))}
+                                    {mockup.tags.length > 3 && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
+                                        +{mockup.tags.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <button 
+                                  className="text-indigo-600 hover:text-indigo-800 p-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewOnGitHub(mockup);
+                                  }}
+                                >
+                                  <ExternalLink size={18} />
+                                </button>
+                                <button className="text-slate-400">
+                                  <ChevronRight size={18} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Category View */}
+                {activeView === 'category' && (
+                  <div className="space-y-8">
+                    {Object.entries(mockupsByCategory).map(([category, mockups]) => (
+                      <div key={category}>
+                        <h2 className="text-lg font-semibold text-slate-800 mb-4">{category}</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {mockups.map((mockup) => (
+                            <div 
+                              key={mockup.id} 
+                              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer border border-slate-200"
+                              onClick={() => handleSelectMockup(mockup)}
+                            >
+                              <div className="p-4">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="bg-indigo-100 p-1.5 rounded-md">
+                                    <Layers size={16} className="text-indigo-600" />
+                                  </div>
+                                  <h3 className="text-md font-medium text-slate-800">{mockup.name}</h3>
+                                </div>
+                                <p className="text-sm text-slate-600 line-clamp-2">{mockup.description}</p>
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  {mockup.tags.slice(0, 2).map(tag => (
+                                    <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                  {mockup.tags.length > 2 && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
+                                      +{mockup.tags.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {filteredMockups.length === 0 && (
+                  <div className="text-center py-20">
+                    <p className="text-slate-600">No mockups found matching your search.</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="bg-white border-t border-slate-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-slate-500 text-sm">
+            SKILL BRIDGE LMS Mockups — Addressing gaps in traditional Learning Management Systems
+          </p>
+          <p className="text-center text-slate-400 text-xs mt-1">
+            <a 
+              href="https://github.com/Nikhil9989/skill-bridge-lms-mockups" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:text-indigo-800"
+            >
+              View on GitHub
+            </a>
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default MockupViewer;
